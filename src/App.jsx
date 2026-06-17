@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { modules, STATUS, STATUS_COLORS, AREA_COLORS, referenceCards } from './data'
 import InternalArchitecture from './InternalArchitecture'
+import GuidedPractice from './GuidedPractice'
 
 const STORAGE_KEY = 'proxmox-deepdive-progress'
 
@@ -132,7 +133,7 @@ export default function App() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          {[['roadmap','🗺️ Roadmap'],['cards','📋 Reference Cards'],['arch','🏗️ Architettura Interna']].map(([v,l]) => (
+          {[['roadmap','🗺️ Roadmap'],['guide','📋 Guida Pratica'],['cards','📇 Reference Cards'],['arch','🏗️ Architettura Interna']].map(([v,l]) => (
             <button key={v} onClick={() => setView(v)} style={{
               padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13,
               background: view === v ? '#fff' : 'rgba(255,255,255,.15)', color: view === v ? '#0f3d2e' : '#fff', transition: 'all .15s'
@@ -168,6 +169,8 @@ export default function App() {
               <span style={{ color: '#64748b', marginLeft: 'auto' }}>💡 Stato salvato automaticamente nel browser</span>
             </div>
           </>
+        ) : view === 'guide' ? (
+          <GuidedPractice />
         ) : view === 'cards' ? (
           <div style={{ display: 'flex', gap: 16 }}>
             <div style={{ width: 220, flexShrink: 0 }}>
