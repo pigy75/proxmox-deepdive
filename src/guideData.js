@@ -334,151 +334,121 @@ export const guideSlides = {
       note: '⚠️ Shrinking (ridurre) un disco non è supportato da Proxmox VE — richiede operazioni manuali rischiose. Non provarci senza backup e senza esperienza.'
     },
 
-    // --- PARTE 1: Proxmox GUI ---
+    // --- PARTE 1: Backup prima ---
     {
-      type: 'mockup',
+      type: 'screenshot',
+      title: 'Prima di tutto — fai un backup',
+      img: '/screenshots/resize-backup.webp',
+      caption: 'VM → Backup → "Backup now". Seleziona lo storage di destinazione e avvia. Solo dopo il backup completo procedi con il resize.',
+    },
+
+    // --- PARTE 2: Proxmox GUI ---
+    {
+      type: 'screenshot',
       title: 'Passo 1 — Vai su Hardware della VM',
-      mockupKind: 'resize-hardware',
-      caption: 'Seleziona la VM nella sidebar → clicca "Hardware" nel menu centrale. Vedrai la lista di tutti i componenti virtuali.',
+      img: '/screenshots/resize-hardware-tab.webp',
+      caption: 'Seleziona la VM nella sidebar → clicca "Hardware". Vedrai il disco listato (es. Hard Disk scsi0). Cliccaci sopra per selezionarlo.',
     },
     {
-      type: 'mockup',
-      title: 'Passo 2 — Seleziona il disco e clicca "Disk Action"',
-      mockupKind: 'resize-select-disk',
-      caption: 'Clicca sul disco da espandere (es. "scsi0" o "virtio0"), poi clicca il pulsante "Disk Action" in alto → scegli "Resize".',
+      type: 'screenshot',
+      title: 'Passo 2 — Disk Action → Resize',
+      img: '/screenshots/resize-disk-action.webp',
+      caption: 'Con il disco selezionato (riga blu), clicca "Disk Action" in alto → scegli "Resize".',
     },
     {
-      type: 'mockup',
-      title: 'Passo 3 — Inserisci il valore di incremento',
-      mockupKind: 'resize-dialog',
-      caption: 'Nel dialog "Resize disk", inserisci quanti GiB vuoi AGGIUNGERE (non la dimensione totale). Es: se il disco era 32GB e vuoi portarlo a 50GB, scrivi "18". Clicca "Resize disk".',
-      warn: 'Il valore è un incremento, non la dimensione finale. Es: "+18" non "50".'
+      type: 'screenshot',
+      title: 'Passo 3 — Inserisci l\'incremento in GiB',
+      img: '/screenshots/resize-size-increment.webp',
+      caption: 'Scrivi quanti GiB vuoi AGGIUNGERE (non la dimensione totale). Es: disco da 32GB → vuoi 50GB → scrivi "18". Clicca "Resize disk".',
+      warn: 'Il valore è un incremento (+GiB), non la dimensione finale.'
     },
     {
       type: 'info',
       title: 'Dopo il resize in Proxmox — cosa succede?',
       bullets: [
-        'Proxmox ha espanso il disco virtuale — il "contenitore" è più grande',
-        'Ma il sistema operativo guest non lo sa ancora — la partizione occupa ancora lo spazio precedente',
-        'Devi ora entrare nel guest (Linux o Windows) e estendere la partizione per usare lo spazio nuovo',
+        'Proxmox ha espanso il "contenitore" del disco virtuale — il disco è più grande',
+        'Ma il sistema operativo guest vede ancora la vecchia partizione — non usa ancora lo spazio aggiunto',
+        'Devi entrare nel guest e estendere la partizione per sfruttare lo spazio nuovo',
       ],
-      note: '💡 Puoi fare il resize con la VM accesa (live resize) — non è necessario spegnerla per Linux moderni.'
+      note: '💡 Puoi fare il resize con la VM accesa — non è necessario spegnerla per Linux moderni.'
     },
 
-    // --- PARTE 2: Linux ---
+    // --- PARTE 3: Linux ---
     {
-      type: 'info',
-      title: 'Estendere la partizione su Linux (Ubuntu)',
-      bullets: [
-        'Ubuntu 24.04 usa una partizione root singola (/) con swap file — struttura semplice',
-        'Strumenti da terminale: lsblk (verifica), growpart (estendi partizione), resize2fs (estendi filesystem)',
-        'Alternativa grafica: GParted Live ISO (avvia la VM da ISO GParted, tutto a click)',
-      ],
-      note: 'I comandi sotto richiedono sudo — sono gli unici passaggi CLI necessari in questa guida.'
+      type: 'screenshot',
+      title: 'Linux — Struttura partizioni standard Ubuntu',
+      img: '/screenshots/resize-linux-fdisk.webp',
+      caption: 'Ubuntu 24.04 usa tipicamente una partizione root (/) su sda3 con LVM. Usa "sudo fdisk -l" per vedere la struttura del tuo sistema.',
+    },
+    {
+      type: 'screenshot',
+      title: 'Linux — Passo 1: verifica il nuovo disco con lsblk',
+      img: '/screenshots/resize-linux-lsblk.webp',
+      caption: 'Dopo il resize in Proxmox, esegui "lsblk" nella VM. Vedrai il disco con la nuova dimensione totale (es. sdb 100G) ma le partizioni ancora piccole.',
     },
     {
       type: 'code',
-      title: 'Linux — Passo 1: verifica il disco con lsblk',
-      code: `# Verifica che il nuovo spazio sia visibile
-lsblk
+      title: 'Linux — Passo 2: estendi partizione e filesystem',
+      code: `# Per disco con LVM (setup standard Ubuntu Server):
+sudo growpart /dev/sda 3        # estendi la partizione LVM
+sudo pvresize /dev/sda3         # aggiorna il Physical Volume LVM
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv  # estendi logical volume
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv  # estendi il filesystem
 
-# Output atteso (esempio):
-# NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-# sda      8:0    0   50G  0 disk          ← disco ora 50GB
-# └─sda1   8:1    0   32G  0 part /        ← partizione ancora 32GB`,
-      caption: 'Il disco mostra già 50GB ma la partizione è rimasta a 32GB — questo è normale. Dobbiamo estenderla.',
+# Verifica finale
+df -h /`,
+      caption: 'Sequenza per Ubuntu Server con LVM (default Ubuntu 24.04). Per Ubuntu Desktop senza LVM: usa solo growpart + resize2fs.',
     },
     {
-      type: 'code',
-      title: 'Linux — Passo 2: estendi la partizione con growpart',
-      code: `# Installa growpart se non presente
-sudo apt install cloud-guest-utils -y
-
-# Estendi la partizione 1 del disco sda
-sudo growpart /dev/sda 1
-
-# Verifica
-lsblk
-# sda1 ora mostra 50GB`,
-      caption: 'growpart espande la partizione per occupare tutto lo spazio disponibile sul disco. Sicuro con la VM accesa.',
-    },
-    {
-      type: 'code',
-      title: 'Linux — Passo 3: estendi il filesystem con resize2fs',
-      code: `# Per filesystem ext4 (il più comune su Ubuntu):
-sudo resize2fs /dev/sda1
-
-# Verifica spazio disponibile
-df -h /
-
-# Output atteso:
-# Filesystem      Size  Used Avail Use% Mounted on
-# /dev/sda1        49G  8.2G   39G  18% /  ← ora 49GB disponibili`,
-      caption: 'resize2fs adatta il filesystem alla nuova dimensione della partizione. Al termine il sistema operativo vede tutto lo spazio.',
-    },
-    {
-      type: 'info',
-      title: 'Linux — Alternativa grafica: GParted',
-      bullets: [
-        '1. Scarica GParted Live ISO da gparted.org',
-        '2. Caricala in Proxmox (local → ISO Images → Upload)',
-        '3. Nella VM: Hardware → CD/DVD → scegli GParted ISO',
-        '4. Opzioni VM → Boot Order → metti CD/DVD prima del disco',
-        '5. Avvia la VM — si carica GParted con interfaccia grafica',
-        '6. Trascina la partizione per espanderla, clicca Apply',
-        '7. Rimuovi l\'ISO e ripristina boot order sul disco',
-      ],
-      note: '💡 GParted è la scelta migliore se non sei a tuo agio con il terminale, o se devi ridimensionare la partizione di boot.'
+      type: 'screenshot',
+      title: 'Linux — Verifica finale con df -h',
+      img: '/screenshots/resize-linux-df.webp',
+      caption: 'Esegui "df -h" per confermare che il filesystem vede ora lo spazio aggiuntivo. La colonna "Size" deve mostrare la nuova dimensione totale.',
     },
 
-    // --- PARTE 3: Windows ---
+    // --- PARTE 4: Windows ---
     {
-      type: 'info',
-      title: 'Estendere il disco su Windows — Disk Management',
-      bullets: [
-        'Windows rileva automaticamente il nuovo spazio non allocato',
-        'Si gestisce tutto via GUI: Disk Management (Gestione disco)',
-        'Nota: in una VM Windows appena installata ci sono partizioni di sistema prima della C: — questo può impedire l\'espansione diretta',
-      ],
+      type: 'screenshot',
+      title: 'Windows — Disk Management: disco non inizializzato',
+      img: '/screenshots/resize-win-new-disk.webp',
+      caption: 'Apri Disk Management (click destro su Start → Disk Management). Se hai aggiunto un disco nuovo vedrai "Disk 1 — Unknown — Offline". Click destro → Online → Initialize Disk (scegli GPT).',
     },
     {
-      type: 'mockup',
-      title: 'Windows — Passo 1: apri Disk Management',
-      mockupKind: 'win-diskmanagement',
-      caption: 'Click destro su Start → "Disk Management" (Gestione disco). Vedrai il disco con lo spazio non allocato (Unallocated) alla fine.',
-    },
-    {
-      type: 'mockup',
-      title: 'Windows — Passo 2: Estendi il volume (C:)',
-      mockupKind: 'win-extend',
-      caption: 'Click destro sulla partizione C: → "Extend Volume..." → segui il wizard → clicca Finish. Windows usa automaticamente tutto lo spazio disponibile.',
-      warn: 'Se "Extend Volume" è grigio, c\'è una partizione di recovery tra C: e lo spazio libero. Soluzione: aggiungi un disco separato per i dati, oppure usa GParted per riorganizzare le partizioni.'
+      type: 'screenshot',
+      title: 'Windows — Struttura partizioni e spazio non allocato',
+      img: '/screenshots/resize-win-partition.webp',
+      caption: 'Dopo il resize in Proxmox vedrai spazio "Unallocated" alla fine del Disk 0. Click destro sulla partizione C: → "Extend Volume..." → segui il wizard → Finish.',
+      warn: 'Se "Extend Volume" è grigio c\'è una partizione di recovery tra C: e lo spazio libero. Soluzione: aggiungi un disco separato (più sicuro) oppure usa GParted.'
     },
 
-    // --- PARTE 4: Aggiungere un disco nuovo ---
+    // --- PARTE 5: Boot order e aggiungere disco nuovo ---
     {
-      type: 'info',
-      title: 'Alternativa: aggiungere un disco nuovo invece di espandere',
-      bullets: [
-        'Invece di espandere il disco esistente, puoi aggiungere un secondo disco virtuale alla VM',
-        'Vantaggio: zero rischi, zero comandi — il disco esistente rimane intatto',
-        'Quando usarlo: per dati separati (es. D: su Windows, /mnt/dati su Linux)',
-      ],
+      type: 'screenshot',
+      title: 'Controllare il Boot Order dopo modifiche hardware',
+      img: '/screenshots/resize-boot-order.webp',
+      caption: 'Dopo aver aggiunto un nuovo disco, controlla sempre Options → Boot Order. Assicurati che il disco di sistema sia al primo posto, non il nuovo disco vuoto.',
     },
     {
-      type: 'mockup',
-      title: 'Aggiungere un disco: Hardware → Add → Hard Disk',
-      mockupKind: 'add-disk',
-      caption: 'VM → Hardware → "Add" → "Hard Disk". Scegli storage, dimensione e tipo bus (SCSI/VirtIO). Il nuovo disco sarà visibile nel guest dopo il riavvio come disco non inizializzato.',
+      type: 'screenshot',
+      title: 'Alternativa: aggiungere un disco nuovo — menu Add',
+      img: '/screenshots/resize-add-menu.webp',
+      caption: 'Hardware → "Add" → "Hard Disk". Questo aggiunge un secondo disco virtuale senza toccare quello esistente — zero rischi, zero CLI.',
+    },
+    {
+      type: 'screenshot',
+      title: 'Alternativa: configurazione del nuovo disco',
+      img: '/screenshots/resize-add-dialog.webp',
+      caption: 'Nel dialog: scegli lo Storage, la dimensione in GiB e il Bus (SCSI consigliato). Clicca "Add" — il disco sarà visibile nel guest al prossimo avvio come disco non inizializzato.',
     },
     {
       type: 'info',
       title: 'Operazione completata ✅',
       bullets: [
-        'Proxmox: resize via Hardware → Disk Action → Resize (incremento in GiB)',
-        'Linux: growpart + resize2fs, oppure GParted Live ISO per chi preferisce la GUI',
-        'Windows: Disk Management → Extend Volume, oppure disco aggiuntivo separato',
-        'Regola d\'oro: backup prima, poi resize — mai il contrario',
+        'Proxmox: Disk Action → Resize (inserisci l\'incremento, non la dimensione finale)',
+        'Linux: growpart + pvresize/lvextend + resize2fs, oppure GParted Live ISO',
+        'Windows: Disk Management → Extend Volume, oppure disco separato',
+        'Sempre controllare Boot Order dopo aggiunta di un nuovo disco',
+        'Regola d\'oro: backup prima, resize dopo',
       ],
     },
   ],
