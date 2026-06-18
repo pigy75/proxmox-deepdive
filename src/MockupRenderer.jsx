@@ -18,6 +18,24 @@ function InstallerBox({ title, children }) {
   );
 }
 
+// Schermata stile installer OS guest (Ubuntu-like, viola/grigio chiaro)
+function GuestOSScreen({ children, height = 380 }) {
+  return (
+    <div style={{ background: '#2c001e', minHeight: height, padding: 24, color: '#fff', fontFamily: "'Inter', sans-serif", fontSize: 13, position: 'relative' }}>
+      {children}
+    </div>
+  );
+}
+
+function GuestOSBox({ title, children }) {
+  return (
+    <div style={{ background: '#fff', color: '#2c2c2c', borderRadius: 8, padding: 20, maxWidth: 460, margin: '14px auto', boxShadow: '0 6px 24px #0006' }}>
+      {title && <div style={{ fontWeight: 700, marginBottom: 14, fontSize: 15, color: '#1a1a1a' }}>{title}</div>}
+      {children}
+    </div>
+  );
+}
+
 export default function MockupRenderer({ kind }) {
   switch (kind) {
 
@@ -401,6 +419,215 @@ export default function MockupRenderer({ kind }) {
             </div>
           </div>
         </ProxmoxWindow>
+      );
+
+    case 'nav-iso':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ display: 'flex' }}>
+            <div style={{ position: 'relative' }}>
+              <ProxmoxSidebar activeItem="local" />
+              <ClickPointer x={50} y={56} />
+            </div>
+            <div style={{ flex: 1, padding: 16, color: '#ccc', fontSize: 12 }}>
+              local (pve) → <span style={{ color: '#fff', fontWeight: 600 }}>ISO Images</span>
+            </div>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'iso-upload-button':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ padding: 16, position: 'relative' }}>
+            <div style={{ color: '#ccc', fontSize: 12, marginBottom: 10 }}>local (pve) → ISO Images</div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <MButton>Download from URL</MButton>
+              <MButton primary highlight>Upload</MButton>
+            </div>
+            <ClickPointer x={-10} y={-6} />
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'task-ok':
+      return (
+        <ProxmoxWindow height={260}>
+          <ProxmoxHeader />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
+            <div style={{ background: '#262626', border: '1px solid #444', borderRadius: 6, padding: '20px 32px', textAlign: 'center' }}>
+              <div style={{ fontSize: 26, marginBottom: 8 }}>✅</div>
+              <div style={{ color: '#4ade80', fontWeight: 700, fontSize: 14, fontFamily: 'monospace' }}>TASK OK</div>
+              <div style={{ color: '#888', fontSize: 11, marginTop: 6 }}>ubuntu-24.04-desktop-amd64.iso</div>
+            </div>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'vm-system':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ position: 'relative', height: 300 }}>
+            <ProxmoxDialog title="Create: Virtual Machine — System">
+              <MField label="Graphic card" value="Default" />
+              <MField label="Machine" value="q35" />
+              <div style={{ fontSize: 12, marginTop: 6 }}>☐ <b style={{ color: '#fff' }}>Qemu Agent</b> <span style={{ color: '#888' }}>(consigliato)</span></div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}><MButton primary>Next</MButton></div>
+            </ProxmoxDialog>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'vm-disk':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ position: 'relative', height: 300 }}>
+            <ProxmoxDialog title="Create: Virtual Machine — Disks">
+              <MField label="Storage" value="local-lvm" />
+              <MField label="Disk size (GiB)" value="32" highlight />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}><MButton primary>Next</MButton></div>
+            </ProxmoxDialog>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'vm-cpu':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ position: 'relative', height: 300 }}>
+            <ProxmoxDialog title="Create: Virtual Machine — CPU">
+              <MField label="Sockets" value="1" />
+              <MField label="Cores" value="2" highlight />
+              <MField label="Type" value="host" />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}><MButton primary>Next</MButton></div>
+            </ProxmoxDialog>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'vm-memory':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ position: 'relative', height: 280 }}>
+            <ProxmoxDialog title="Create: Virtual Machine — Memory">
+              <MField label="Memory (MiB)" value="2048" highlight />
+              <div style={{ fontSize: 11, color: '#888', marginTop: 8 }}>Lascia RAM sufficiente anche per l'host</div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}><MButton primary>Next</MButton></div>
+            </ProxmoxDialog>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'vm-network':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ position: 'relative', height: 300 }}>
+            <ProxmoxDialog title="Create: Virtual Machine — Network">
+              <MField label="Bridge" value="vmbr0" highlight />
+              <MField label="Model" value="VirtIO (paravirtualized)" />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}><MButton primary>Next</MButton></div>
+            </ProxmoxDialog>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'vm-console-start':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ display: 'flex' }}>
+            <ProxmoxSidebar activeItem="100" />
+            <div style={{ flex: 1, padding: 16, position: 'relative' }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                <MButton>{'>_ Console'}</MButton>
+              </div>
+              <div style={{ background: '#000', height: 160, borderRadius: 4, padding: 8, color: '#444', fontSize: 10.5, fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                VM stopped
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                <MButton primary highlight>Start Now</MButton>
+                <ClickPointer x={-10} y={-8} />
+              </div>
+            </div>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'os-boot':
+      return (
+        <GuestOSScreen height={300}>
+          <GuestOSBox>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 16 }}>🐧 Try or Install Ubuntu</div>
+              <div style={{ background: '#f3f4f6', borderRadius: 6, padding: '8px 16px', display: 'inline-block', border: '2px solid #e57000', fontWeight: 700 }}>
+                ▶ Install Ubuntu
+              </div>
+              <div style={{ fontSize: 11, color: '#888', marginTop: 14 }}>Premi Invio per continuare</div>
+            </div>
+          </GuestOSBox>
+        </GuestOSScreen>
+      );
+
+    case 'os-language':
+      return (
+        <GuestOSScreen height={320}>
+          <GuestOSBox title="Welcome">
+            <div style={{ fontSize: 12.5, color: '#444', marginBottom: 10 }}>Seleziona la tua lingua</div>
+            <div style={{ background: '#fef3e8', border: '2px solid #e57000', borderRadius: 6, padding: '8px 14px', fontWeight: 600, display: 'inline-block' }}>
+              Italiano
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}><MButton primary>Continua</MButton></div>
+          </GuestOSBox>
+        </GuestOSScreen>
+      );
+
+    case 'os-disk':
+      return (
+        <GuestOSScreen height={320}>
+          <GuestOSBox title="Tipo di installazione">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12.5 }}>
+              <div style={{ background: '#fef3e8', border: '2px solid #e57000', borderRadius: 6, padding: 10, fontWeight: 600 }}>
+                ● Erase disk and install Ubuntu
+              </div>
+              <div style={{ background: '#f3f4f6', borderRadius: 6, padding: 10, color: '#888' }}>
+                ○ Manual partitioning (advanced)
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}><MButton primary>Install Now</MButton></div>
+          </GuestOSBox>
+        </GuestOSScreen>
+      );
+
+    case 'os-account':
+      return (
+        <GuestOSScreen height={340}>
+          <GuestOSBox title="Crea il tuo account">
+            <MField label="Nome" value="" placeholder="es. mario" />
+            <MField label="Nome computer" value="" placeholder="ubuntu-test" />
+            <MField label="Password" value="" placeholder="••••••••" />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}><MButton primary>Continua</MButton></div>
+          </GuestOSBox>
+        </GuestOSScreen>
+      );
+
+    case 'os-install-done':
+      return (
+        <GuestOSScreen height={300}>
+          <GuestOSBox>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 28, marginBottom: 10 }}>🎉</div>
+              <div style={{ fontWeight: 700, marginBottom: 14 }}>Installation Complete</div>
+              <MButton primary highlight>Restart Now</MButton>
+            </div>
+          </GuestOSBox>
+        </GuestOSScreen>
       );
 
     default:
