@@ -630,6 +630,137 @@ export default function MockupRenderer({ kind }) {
         </GuestOSScreen>
       );
 
+    case 'resize-hardware':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ display: 'flex' }}>
+            <ProxmoxSidebar activeItem="100" />
+            <div style={{ flex: 1, padding: 16 }}>
+              <div style={{ color: '#ccc', fontSize: 12, marginBottom: 10, borderBottom: '1px solid #3a3a3a', paddingBottom: 8 }}>
+                VM 100 (ubuntu-test) → <span style={{ color: '#fff', fontWeight: 600 }}>Hardware</span>
+              </div>
+              <table style={{ width: '100%', fontSize: 11.5, color: '#ccc', borderCollapse: 'collapse' }}>
+                <tbody>
+                  {[['Hard Disk (scsi0)', 'local-lvm:vm-100-disk-0, 32GB'],['CD/DVD Drive (ide2)', 'none'],['Network Device (net0)','virtio=..., bridge=vmbr0'],['Memory','2048 MiB'],['Processors','1 (1 sockets, 1 cores)']].map(([k,v],i) => (
+                    <tr key={i} style={{ background: i===0 ? '#2a3a2a' : 'transparent', border: i===0 ? '1px solid #4ade80' : 'none' }}>
+                      <td style={{ padding: '5px 8px', fontWeight: i===0?700:400 }}>{k}</td>
+                      <td style={{ padding: '5px 8px', color: '#aaa' }}>{v}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'resize-select-disk':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ display: 'flex' }}>
+            <ProxmoxSidebar activeItem="100" />
+            <div style={{ flex: 1, padding: 16, position: 'relative' }}>
+              <div style={{ color: '#ccc', fontSize: 12, marginBottom: 10 }}>VM 100 → Hardware</div>
+              <div style={{ background: '#2a3a2a', border: '1px solid #4ade80', borderRadius: 4, padding: '6px 10px', fontSize: 12, color: '#fff', marginBottom: 10 }}>
+                ✓ Hard Disk (scsi0) — local-lvm:vm-100-disk-0, 32GB
+              </div>
+              <div style={{ display: 'flex', gap: 8, position: 'relative' }}>
+                <MButton>Add</MButton>
+                <MButton>Edit</MButton>
+                <MButton>Remove</MButton>
+                <MButton primary highlight>Disk Action ▾</MButton>
+                <ClickPointer x={-10} y={-8} />
+              </div>
+              <div style={{ marginTop: 6, background: '#1a1a1a', border: '1px solid #555', borderRadius: 4, width: 140, padding: '4px 0', fontSize: 12 }}>
+                <div style={{ padding: '5px 12px', color: '#ccc' }}>Move Storage</div>
+                <div style={{ padding: '5px 12px', background: '#e57000', color: '#fff', fontWeight: 700 }}>Resize</div>
+              </div>
+            </div>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'resize-dialog':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ position: 'relative', height: 260 }}>
+            <ProxmoxDialog title="Resize disk: vm-100-disk-0 (scsi0)" width={400}>
+              <div style={{ fontSize: 11.5, color: '#aaa', marginBottom: 12 }}>
+                Dimensione attuale: <b style={{ color: '#fff' }}>32 GiB</b>
+              </div>
+              <MField label="Size Increment (GiB)" value="18" highlight />
+              <div style={{ fontSize: 11, color: '#888', marginBottom: 14 }}>
+                Dimensione finale: 32 + 18 = <b style={{ color: '#4ade80' }}>50 GiB</b>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, position: 'relative' }}>
+                <MButton>Abort</MButton>
+                <MButton primary highlight>Resize disk</MButton>
+                <ClickPointer x={-5} y={-8} />
+              </div>
+            </ProxmoxDialog>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'win-diskmanagement': {
+      const parts = [
+        { label: 'System Reserved\n500 MB', color: '#3b82f6', w: 60 },
+        { label: 'C:\n32 GB  NTFS', color: '#22c55e', w: 260 },
+        { label: 'Unallocated\n18 GB', color: '#374151', w: 120, dashed: true },
+      ];
+      return (
+        <ProxmoxWindow title="Disk Management">
+          <div style={{ background: '#1e1e1e', padding: 16 }}>
+            <div style={{ color: '#ccc', fontSize: 12, marginBottom: 12 }}>Disk 0 — Basic — 50.00 GB — Online</div>
+            <div style={{ display: 'flex', gap: 2, height: 60 }}>
+              {parts.map((p, i) => (
+                <div key={i} style={{
+                  width: p.w, background: p.color, border: p.dashed ? '2px dashed #6b7280' : 'none',
+                  borderRadius: 3, padding: 6, fontSize: 9.5, color: p.dashed ? '#9ca3af' : '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', whiteSpace: 'pre'
+                }}>{p.label}</div>
+              ))}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 11, color: '#888' }}>
+              Click destro su C: → "Extend Volume..."
+            </div>
+          </div>
+        </ProxmoxWindow>
+      );
+    }
+
+    case 'win-extend':
+      return (
+        <ProxmoxWindow title="Disk Management">
+          <div style={{ background: '#1e1e1e', padding: 16 }}>
+            <div style={{ color: '#ccc', fontSize: 12, marginBottom: 10 }}>Disk 0 — dopo Extend Volume</div>
+            <div style={{ display: 'flex', gap: 2, height: 60 }}>
+              <div style={{ width: 60, background: '#3b82f6', borderRadius: 3, padding: 6, fontSize: 9.5, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', whiteSpace: 'pre' }}>System Reserved{'\n'}500 MB</div>
+              <div style={{ flex: 1, background: '#22c55e', borderRadius: 3, padding: 6, fontSize: 11, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>C: — 50 GB  NTFS ✓</div>
+            </div>
+            <div style={{ marginTop: 10, fontSize: 11, color: '#4ade80' }}>✓ Volume esteso con successo — C: ora 50 GB</div>
+          </div>
+        </ProxmoxWindow>
+      );
+
+    case 'add-disk':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ position: 'relative', height: 300 }}>
+            <ProxmoxDialog title="Add: Hard Disk">
+              <MField label="Storage" value="local-lvm" />
+              <MField label="Disk size (GiB)" value="100" highlight />
+              <MField label="Bus/Device" value="SCSI / 1" />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}><MButton primary>Add</MButton></div>
+            </ProxmoxDialog>
+          </div>
+        </ProxmoxWindow>
+      );
+
     default:
       return (
         <ProxmoxWindow>

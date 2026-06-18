@@ -52,7 +52,19 @@ export default function GuidedPractice() {
 
         <h2 style={{ margin: '0 0 18px', fontSize: 19, color: '#1e293b' }}>{slide.title}</h2>
 
-        {slide.type === 'screenshot' ? (
+        {slide.type === 'code' ? (
+          <div>
+            <pre style={{
+              background: '#0f172a', color: '#e2e8f0', borderRadius: 10,
+              padding: '16px 20px', fontSize: 12.5, lineHeight: 1.7,
+              overflowX: 'auto', fontFamily: "'Fira Mono', 'Consolas', monospace",
+              border: '1px solid #1e293b', margin: 0
+            }}>
+              <code>{slide.code}</code>
+            </pre>
+            <p style={{ marginTop: 14, fontSize: 14, color: '#334155', lineHeight: 1.6 }}>{slide.caption}</p>
+          </div>
+        ) : slide.type === 'screenshot' ? (
           <div>
             <img
               src={slide.img}
