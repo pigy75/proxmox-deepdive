@@ -52,7 +52,21 @@ export default function GuidedPractice() {
 
         <h2 style={{ margin: '0 0 18px', fontSize: 19, color: '#1e293b' }}>{slide.title}</h2>
 
-        {slide.type === 'mockup' ? (
+        {slide.type === 'screenshot' ? (
+          <div>
+            <img
+              src={slide.img}
+              alt={slide.title}
+              style={{ width: '100%', borderRadius: 8, border: '1px solid #e2e8f0', boxShadow: '0 2px 10px #0001' }}
+            />
+            <p style={{ marginTop: 14, fontSize: 14, color: '#334155', lineHeight: 1.6 }}>{slide.caption}</p>
+            {slide.warn && (
+              <div style={{ marginTop: 10, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '8px 14px', fontSize: 12.5, color: '#b91c1c' }}>
+                ⚠️ {slide.warn}
+              </div>
+            )}
+          </div>
+        ) : slide.type === 'mockup' ? (
           <div>
             <MockupRenderer kind={slide.mockupKind} />
             <p style={{ marginTop: 16, fontSize: 14, color: '#334155', lineHeight: 1.6 }}>{slide.caption}</p>
