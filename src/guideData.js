@@ -451,5 +451,59 @@ df -h /`,
         'Regola d\'oro: backup prima, resize dopo',
       ],
     },
+
+    // ─── SNAPSHOT ────────────────────────────────────────────────────────────
+    // Fonte: pve.proxmox.com/wiki/Live_Snapshots + Proxmox VE Admin Guide
+    {
+      type: 'info',
+      title: 'Operazione: Snapshot di una VM',
+      bullets: [
+        'Uno snapshot cattura lo stato completo della VM in un momento preciso: memoria RAM, dischi, configurazione',
+        'Rollback in un click → torna esattamente come era quando hai fatto lo snapshot',
+        'Caso d\'uso tipico: prima di installare software rischioso, fare un aggiornamento, o testare configurazioni',
+        'IMPORTANTE: lo snapshot NON sostituisce il backup — è sullo stesso storage, stesso rischio di guasto',
+      ],
+      note: '⚠️ Requisito: i dischi VM devono essere in formato qcow2 oppure su storage che supporta snapshot (es. ZFS, Ceph). LVM-thin supporta snapshot ma senza RAM state.'
+    },
+    {
+      type: 'screenshot',
+      title: 'Snapshot — la lista degli snapshot di una VM',
+      img: '/screenshots/snap-list.png',
+      caption: 'VM → tab "Snapshots". Vedrai l\'albero degli snapshot con nome, data, se include la RAM e la descrizione. "NOW" indica il punto in cui sei adesso.',
+    },
+    {
+      type: 'screenshot',
+      title: 'Passo 1 — Crea uno snapshot: "Take Snapshot"',
+      img: '/screenshots/snap-create.png',
+      caption: 'Clicca "Take Snapshot". Compila: Nome (es. "before_running_dcpromo"), spunta "Include RAM" se vuoi congelare anche lo stato della memoria, aggiungi una Descrizione chiara. Clicca "Take Snapshot".',
+    },
+    {
+      type: 'info',
+      title: 'Snapshot — Include RAM o no?',
+      bullets: [
+        'Include RAM ✓ → snapshot completo: memorie, processi in esecuzione, tutto. La VM non si accorge di nulla (live snapshot). Richiede spazio extra sul disco pari alla RAM della VM.',
+        'Include RAM ✗ → snapshot solo disco e configurazione. Più veloce e leggero, ma al rollback la VM ripartirà da spenta.',
+        'Consiglio per principianti: spunta sempre "Include RAM" finché hai spazio a sufficienza',
+      ],
+      note: '💡 Se la VM ha molta RAM (es. 16GB) lo snapshot con RAM richiede almeno 16GB liberi sullo storage.'
+    },
+    {
+      type: 'mockup',
+      title: 'Passo 2 — Rollback a uno snapshot',
+      mockupKind: 'snap-rollback',
+      caption: 'Seleziona lo snapshot nella lista → clicca "Rollback". Proxmox spegnerà la VM, ripristinerà lo stato salvato e la riavvierà. Operazione irreversibile — tutto ciò che hai fatto dopo lo snapshot andrà perso.',
+      warn: 'Il Rollback cancella tutte le modifiche fatte dopo lo snapshot. Assicurati di volerlo davvero prima di confermare.'
+    },
+    {
+      type: 'info',
+      title: 'Snapshot — Consigli pratici',
+      bullets: [
+        'Dai nomi descrittivi: "before_windows_update_giugno" è meglio di "snap1"',
+        'Non accumulare troppi snapshot — rallentano le operazioni I/O sul disco',
+        'Elimina gli snapshot vecchi quando non ti servono più (tasto "Remove")',
+        'Gli snapshot NON sono inclusi nei backup vzdump — sono due cose separate',
+        'Per VM critiche: snapshot prima di ogni modifica, backup periodico per disaster recovery',
+      ],
+    },
   ],
 };

@@ -761,6 +761,34 @@ export default function MockupRenderer({ kind }) {
         </ProxmoxWindow>
       );
 
+    case 'snap-rollback':
+      return (
+        <ProxmoxWindow>
+          <ProxmoxHeader />
+          <div style={{ display: 'flex' }}>
+            <ProxmoxSidebar activeItem="100" />
+            <div style={{ flex: 1, padding: 16 }}>
+              <div style={{ color: '#ccc', fontSize: 12, marginBottom: 10, borderBottom: '1px solid #3a3a3a', paddingBottom: 8 }}>
+                VM 100 → <span style={{ color: '#fff', fontWeight: 600 }}>Snapshots</span>
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+                <MButton>Take Snapshot</MButton>
+                <MButton primary highlight>Rollback</MButton>
+                <MButton>Remove</MButton>
+              </div>
+              <div style={{ fontSize: 11.5, color: '#aaa', marginBottom: 8 }}>Snapshot selezionato:</div>
+              <div style={{ background: '#2a3a2a', border: '1px solid #4ade80', borderRadius: 4, padding: '8px 12px', fontSize: 12 }}>
+                <span style={{ color: '#4ade80', fontWeight: 700 }}>✓ before_running_dcpromo</span>
+                <span style={{ color: '#888', marginLeft: 12 }}>Dec 17 16:21 — Snapshot before running ADS installation</span>
+              </div>
+              <div style={{ marginTop: 12, background: '#3a1a1a', border: '1px solid #f87171', borderRadius: 6, padding: '8px 12px', fontSize: 11.5, color: '#fca5a5' }}>
+                ⚠️ Tutte le modifiche dopo questo snapshot andranno perse. Confermi?
+              </div>
+            </div>
+          </div>
+        </ProxmoxWindow>
+      );
+
     default:
       return (
         <ProxmoxWindow>
